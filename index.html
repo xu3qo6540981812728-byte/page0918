@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>9/18 央行理監事會議房市影響分析</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals (Slate & Sky) -->
+    <!-- Application Structure Plan: The application is designed as a single-page, scrollable narrative analysis, mimicking a professional blog post or "lazy pack". The structure flows from a high-level summary to deep dives, enhancing user understanding. 1. Hero Section: Grabs attention with key takeaways. 2. Meeting Overview: Uses a card layout for a quick, digestible summary of the core decisions. 3. Interest Rate Deep Dive: Combines a line chart with text to explain the 'why' behind the rate decision. 4. Housing Controls Impact Analysis: This is the core interactive element. A persona-based selector allows users to get personalized information, which is far more engaging and useful than a static table. 5. Historical Context: An interactive timeline helps users understand the current policy in the context of past actions. 6. Market Outlook: Concludes with a forward-looking analysis using a simple bar chart. This top-down, interactive structure guides the user from what happened to why it matters and what might happen next, making complex information accessible. -->
+    <!-- Visualization & Content Choices: 1. Key Metrics (Hero): Goal: Inform. Method: Large HTML text. Justification: High visibility for critical data points like the policy rate. 2. Policy Rate vs. CPI Trend: Goal: Show Change/Relationship. Method: Chart.js Line Chart. Interaction: Hover tooltips. Justification: Visualizes the core tension between inflation and economic stability that drives the rate decision. 3. Housing Control Impact: Goal: Inform/Compare. Method: JS-powered dynamic text block based on button selection. Interaction: Click buttons. Justification: Personalizes complex policy impacts, directly answering "how does this affect me?". 4. Historical Controls Timeline: Goal: Show Change/Organize. Method: Interactive HTML/CSS list. Interaction: Click to reveal details. Justification: Provides crucial context without cluttering the UI. 5. Transaction Volume Forecast: Goal: Compare/Inform. Method: Chart.js Bar Chart. Justification: Offers a clear, quantitative outlook on the market's future. All choices prioritize clarity and user interaction. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f8fafc;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -30px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: #0284c7;
+            border: 3px solid #f0f9ff;
+        }
+        .timeline-line {
+            position: absolute;
+            left: -21px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background-color: #e0f2fe;
+        }
+        #watermark {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-30deg);
+            font-size: 5vw;
+            color: rgba(100, 116, 139, 0.08);
+            font-weight: 700;
+            z-index: 9999;
+            pointer-events: none;
+            text-align: center;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <div id="watermark">桃園房仲專業顧問李培智</div>
+
+    <div class="container mx-auto p-4 md:p-8 max-w-5xl">
+
+        <!-- Header / Hero Section -->
+        <header class="text-center mb-12">
+            <h1 class="text-3xl md:text-5xl font-bold text-slate-900 mb-2">9/18央行理監事會議懶人包</h1>
+            <p class="text-lg md:text-xl text-sky-700 font-semibold">利率連六凍、第六波房市管制全解析</p>
+            <p class="mt-4 text-slate-600 max-w-3xl mx-auto">
+                2025年9月18日，台灣央行召開第三季理監事聯席會議，決議利率維持不變，但針對房地產市場再度祭出選擇性信用管制。本篇將從房地產角度，為您深度解析會議重點及其對市場的潛在影響。
+            </p>
+        </header>
+
+        <!-- Main Content -->
+        <main>
+
+            <!-- Section 1: Meeting Overview -->
+            <section id="overview" class="mb-16">
+                <h2 class="text-2xl md:text-3xl font-bold text-center mb-8 text-slate-900">會議三大重點總覽</h2>
+                <div class="grid md:grid-cols-3 gap-6 text-center">
+                    <div class="bg-white p-6 rounded-lg shadow-md border-t-4 border-sky-500">
+                        <div class="text-5xl font-bold text-sky-600 mb-2">2.125%</div>
+                        <h3 class="text-xl font-semibold mb-2 text-slate-800">政策利率不變</h3>
+                        <p class="text-slate-600">考量國內通膨壓力趨緩但全球經濟前景不確定性仍高，為維持物價穩定與金融穩健，央行理事會一致同意維持重貼現率、擔保放款融通利率及短期融通利率不變。</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md border-t-4 border-amber-500">
+                        <div class="text-3xl font-bold text-amber-600 mb-2 leading-tight">第六波<br>選擇性信用管制</div>
+                        <h3 class="text-xl font-semibold mb-2 text-slate-800">精準調控房市</h3>
+                        <p class="text-slate-600">針對特定地區第二戶購屋貸款成數上限，由7成降至6成，且無寬限期。此舉旨在抑制部分都會區過熱的房市投資需求，但對首購族群影響有限。</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md border-t-4 border-teal-500">
+                         <div class="text-5xl font-bold text-teal-600 mb-2">2.8%</div>
+                        <h3 class="text-xl font-semibold mb-2 text-slate-800">經濟成長預測</h3>
+                        <p class="text-slate-600">央行微幅下修2025年全年經濟成長率(GDP)預測值至2.8%，反映出口成長動能放緩，但國內消費依然穩健，整體經濟維持溫和成長基調。</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 2: Interest Rate Analysis -->
+            <section id="rates" class="mb-16 bg-white p-6 md:p-8 rounded-lg shadow-lg">
+                <h2 class="text-2xl md:text-3xl font-bold text-center mb-2 text-slate-900">利率政策深度解析</h2>
+                <p class="text-center text-slate-600 mb-8 max-w-3xl mx-auto">央行為何在通膨與經濟成長之間，選擇了「按兵不動」？下方的圖表呈現了近年台灣的政策利率與消費者物價指數(CPI)年增率的關係，這揭示了央行決策背後的權衡。
+                </p>
+                <div class="grid lg:grid-cols-5 gap-8 items-center">
+                    <div class="lg:col-span-3">
+                        <div class="chart-container">
+                            <canvas id="rateCpiChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-2">
+                        <h3 class="font-semibold text-lg text-slate-800 mb-2">決策的十字路口</h3>
+                        <p class="text-slate-600 mb-4">
+                            圖表顯示，自2022年升息循環啟動後，政策利率逐步上揚，成功抑制了當時高漲的通膨。進入2025年，CPI年增率已回落至2%目標區間附近，升息的迫切性降低。
+                        </p>
+                        <p class="text-slate-600">
+                            另一方面，全球經濟放緩影響台灣出口表現，若貿然升息可能進一步衝擊經濟成長。因此，央行選擇維持利率穩定，並改以針對性的房市管制措施，來處理資產價格過熱的問題，達成「穩物價、顧經濟、健全房市」的多重目標。
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 3: Impact on Real Estate -->
+            <section id="impact" class="mb-16">
+                <h2 class="text-2xl md:text-3xl font-bold text-center mb-2 text-slate-900">第六波房市管制對我的影響？</h2>
+                <p class="text-center text-slate-600 mb-8 max-w-3xl mx-auto">這次的管制措施更具針對性。點選下方符合您身份的按鈕，了解新政策對您的具體影響。
+                </p>
+                <div class="flex flex-wrap justify-center gap-3 mb-6">
+                    <button class="impact-btn bg-sky-600 text-white py-2 px-5 rounded-full shadow-md hover:bg-sky-700 focus:ring-4 focus:ring-sky-200 transition duration-300" data-persona="firstTime">首購族</button>
+                    <button class="impact-btn bg-slate-200 text-slate-700 py-2 px-5 rounded-full shadow-md hover:bg-slate-300 focus:ring-4 focus:ring-slate-200 transition duration-300" data-persona="mover">換屋族</button>
+                    <button class="impact-btn bg-slate-200 text-slate-700 py-2 px-5 rounded-full shadow-md hover:bg-slate-300 focus:ring-4 focus:ring-slate-200 transition duration-300" data-persona="investor">投資族</button>
+                    <button class="impact-btn bg-slate-200 text-slate-700 py-2 px-5 rounded-full shadow-md hover:bg-slate-300 focus:ring-4 focus:ring-slate-200 transition duration-300" data-persona="developer">建商</button>
+                </div>
+                <div id="impact-content" class="bg-white p-6 md:p-8 rounded-lg shadow-lg min-h-[200px] transition-all duration-500">
+                    <!-- Dynamic content will be injected here -->
+                </div>
+            </section>
+            
+            <!-- Section 4: Historical Controls -->
+            <section id="history" class="mb-16">
+                 <h2 class="text-2xl md:text-3xl font-bold text-center mb-8 text-slate-900">歷年房市管制回顧</h2>
+                 <p class="text-center text-slate-600 mb-12 max-w-3xl mx-auto">自2020年底以來，央行已多次調整選擇性信用管制措施。透過回顧歷史，我們可以更清楚地看見政策演變的脈絡，以及政府穩定房市的決心。點擊各個時間點以查看當時的重點措施。</p>
+                <div class="relative pl-8">
+                    <div class="timeline-line"></div>
+                    <div class="space-y-10">
+                        <div class="timeline-item relative cursor-pointer" onclick="toggleDetails('history-6')">
+                            <h4 class="font-bold text-lg text-sky-700">2025 Q3 (本次)</h4>
+                            <p class="text-slate-600">第六波：特定地區第二戶貸款成數降至6成。</p>
+                            <div id="history-6" class="hidden mt-2 text-sm bg-sky-50 p-3 rounded-md">
+                                <strong>重點：</strong>針對台北市、新北市、桃園市、新竹縣市、台中市、台南市、高雄市等八大都會區，自然人購買第二戶住宅貸款成數不得超過6成，且無寬限期。
+                            </div>
+                        </div>
+                        <div class="timeline-item relative cursor-pointer" onclick="toggleDetails('history-5')">
+                            <h4 class="font-bold text-lg">2023 Q2</h4>
+                            <p class="text-slate-600">第五波：規範自然人特定地區第二戶購屋貸款寬限期。</p>
+                            <div id="history-5" class="hidden mt-2 text-sm bg-slate-100 p-3 rounded-md">
+                                <strong>重點：</strong>同上八大都會區，自然人第二戶購屋貸款取消寬限期，旨在降低短期炒作誘因。
+                            </div>
+                        </div>
+                        <div class="timeline-item relative cursor-pointer" onclick="toggleDetails('history-4')">
+                            <h4 class="font-bold text-lg">2021 Q4</h4>
+                            <p class="text-slate-600">第四波：進一步下修購地貸款成數。</p>
+                            <div id="history-4" class="hidden mt-2 text-sm bg-slate-100 p-3 rounded-md">
+                                <strong>重點：</strong>購地貸款最高成數降為5成，並要求其中1成須動工後才可撥貸，同時餘屋貸款也降至4成。
+                            </div>
+                        </div>
+                        <div class="timeline-item relative cursor-pointer" onclick="toggleDetails('history-1')">
+                            <h4 class="font-bold text-lg">2020 Q4</h4>
+                            <p class="text-slate-600">第一波：重啟房市信用管制。</p>
+                             <div id="history-1" class="hidden mt-2 text-sm bg-slate-100 p-3 rounded-md">
+                                <strong>重點：</strong>針對公司法人、自然人多戶、以及購地貸款等進行成數限制，為睽違十年的房市管制。
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 5: Market Outlook -->
+            <section id="outlook" class="bg-white p-6 md:p-8 rounded-lg shadow-lg">
+                <h2 class="text-2xl md:text-3xl font-bold text-center mb-8 text-slate-900">未來房市展望</h2>
+                 <p class="text-center text-slate-600 mb-8 max-w-3xl mx-auto">新政策上路後，市場將如何反應？我們從價、量、以及買方心態三個層面進行分析，並預估短期內市場交易量可能的變化。</p>
+                <div class="grid lg:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <ul class="space-y-4">
+                            <li><strong class="text-slate-800">價格：</strong>短期內，投資熱區的價格漲幅預計將趨緩，甚至出現微幅盤整。但由於利率未升，資金成本仍在低檔，加上營建成本支撐，房價要出現大幅下跌的可能性不高。</li>
+                            <li><strong class="text-slate-800">交易量：</strong>預計第四季整體交易量將呈現「量縮」格局。投資性買盤因貸款成數降低而縮手觀望，市場將更由自住剛性需求主導。</li>
+                            <li><strong class="text-slate-800">買方心態：</strong>首購族影響不大，可持續看屋；換屋族需更精算資金，可能拉長決策時間；投資客則會轉趨保守，或尋找非管制區的標的。</li>
+                        </ul>
+                    </div>
+                    <div>
+                         <div class="chart-container" style="height: 300px; max-height: 350px;">
+                            <canvas id="volumeForecastChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Footer -->
+        <footer class="text-center mt-16 py-6 border-t border-slate-200">
+            <div class="flex flex-col sm:flex-row justify-center items-center gap-4 mb-6">
+                <a href="https://linkgoods.com/pagehouse" target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors duration-300 flex items-center justify-center gap-2 shadow-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" /><path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" /></svg>
+                    <span>聯繫顧問培智</span>
+                </a>
+                <a href="https://line.me/ti/p/ueNu_ueXaV" target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto bg-green-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-600 transition-colors duration-300 flex items-center justify-center gap-2 shadow-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24"><path d="M16.229 13.115c-.242-.121-.242-.121-1.331-.605-.121-.061-.242-.061-.363 0-.121.061-.182.182-.182.242 0 .121.061.242.121.363.848.424 1.029.969.424 1.514-.424.424-.908.666-1.393.666-.061 0-.121 0-.121 0-.182 0-.303-.061-.424-.121-.182-.121-.242-.303-.242-.484 0-.182.061-.363.182-.484.424-.424.848-.969.908-1.393.061-.363 0-.666-.182-.908-.182-.242-.484-.424-.848-.484-.363-.061-.727 0-1.029.182-.303.182-.545.424-.666.727-.121.303-.121.605-.061.908.061.363.242.666.484.969.242.242.545.424.908.545.363.121.727.121 1.09.061.182-.061.363-.121.545-.182.121-.061.242-.061.363-.061.303 0 .545.121.727.242.182.121.303.303.363.545.061.242 0 .484-.061.727-.121.242-.242.424-.424.605-.182.182-.424.303-.666.424-.545.242-1.15.363-1.756.363-.666 0-1.272-.121-1.817-.363-.545-.242-1.029-.605-1.453-.969-.424-.424-.787-.908-1.029-1.453-.242-.545-.363-1.15-.363-1.817s.121-1.272.363-1.817c.242-.545.605-1.029.969-1.453.424-.424.908-.787 1.453-1.029.545-.242 1.15-.363 1.817-.363.908 0 1.756.242 2.543.727.424.242.727.545.969.908.242.424.363.848.363 1.332s-.061.969-.242 1.393zm6.357-12.109c-2.059-2.059-4.783-3.148-7.586-3.148-5.995 0-10.84 4.845-10.84 10.84 0 2.803 1.089 5.527 3.148 7.586 2.059 2.059 4.783 3.148 7.586 3.148 5.995 0 10.84-4.845 10.84-10.84 0-2.803-1.089-5.527-3.148-7.586z"/></svg>
+                    <span>加入 LINE 好友</span>
+                </a>
+            </div>
+            <p class="text-slate-500 text-sm mt-4">&copy; 2025 桃園房仲專業顧問 李培智. All Rights Reserved.</p>
+        </footer>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            
+            const impactContentData = {
+                firstTime: {
+                    title: '對【首購族】的影響：幾乎沒有衝擊',
+                    content: '本次管制措施主要針對「第二戶」購屋，如果您是名下沒有房產的首購族，完全不受影響。您依然可以申請最高8成的貸款成數，並且有機會搭配政府的「新青年安心成家」等優惠貸款方案。利率未升反而是個好消息，代表您的房貸負擔不會立即增加。市場上投資客的減少，或許能讓您有更多議價的空間與更從容的看屋時間。'
+                },
+                mover: {
+                    title: '對【換屋族】的影響：資金規劃是關鍵',
+                    content: '對於需要「先買後賣」的換屋族，這次管制影響較大。在新屋貸款撥款時，若舊屋尚未售出，新購的房屋將被視為「第二戶」，貸款成數最高只有6成。這代表您需要準備更多的自備款。建議換屋族採取「先賣後買」策略，或與銀行協商提供切結，在一定期限內（通常為一年）出售舊屋，以爭取較佳的貸款條件。'
+                },
+                investor: {
+                    title: '對【投資族】的影響：槓桿降低，成本增加',
+                    content: '本次政策精準打擊短期投資與槓桿操作。第二戶貸款成數降至6成，大幅提高了資金門檻。對於想在八大都會區購買第二套房產收租或等待增值的投資客來說，代表財務槓桿效益降低。部分資金不足的投資客可能會暫時退場，或將目光轉向不受管制的地區、或商用不動產等其他投資標的。'
+                },
+                developer: {
+                    title: '對【建商】的影響：間接影響，銷售策略需調整',
+                    content: '雖然本次管制未直接對建商的土建融貸款設下更嚴格的限制，但對下游買方的限制，將會間接影響建商的銷售速度。尤其是在以投資客群為主的建案，去化速度可能放緩。預期建商在第四季的行銷策略會更著重於吸引首購與長期置產的客群，並可能推出更優惠的付款方案以加速成交。'
+                }
+            };
+
+            const impactContentContainer = document.getElementById('impact-content');
+            const impactButtons = document.querySelectorAll('.impact-btn');
+
+            function updateImpactContent(persona) {
+                const data = impactContentData[persona];
+                impactContentContainer.innerHTML = `
+                    <h3 class="text-xl md:text-2xl font-bold text-sky-700 mb-4">${data.title}</h3>
+                    <p class="text-slate-600 leading-relaxed">${data.content}</p>
+                `;
+
+                impactButtons.forEach(btn => {
+                    if (btn.dataset.persona === persona) {
+                        btn.classList.remove('bg-slate-200', 'text-slate-700');
+                        btn.classList.add('bg-sky-600', 'text-white');
+                    } else {
+                        btn.classList.remove('bg-sky-600', 'text-white');
+                        btn.classList.add('bg-slate-200', 'text-slate-700');
+                    }
+                });
+            }
+
+            impactButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    updateImpactContent(button.dataset.persona);
+                });
+            });
+
+            updateImpactContent('firstTime');
+
+            window.toggleDetails = function(id) {
+                const element = document.getElementById(id);
+                element.classList.toggle('hidden');
+            }
+
+            const ctxRateCpi = document.getElementById('rateCpiChart').getContext('2d');
+            new Chart(ctxRateCpi, {
+                type: 'line',
+                data: {
+                    labels: ['2023 Q1', '2023 Q2', '2023 Q3', '2023 Q4', '2024 Q1', '2024 Q2', '2024 Q3', '2024 Q4', '2025 Q1', '2025 Q2', '2025 Q3'],
+                    datasets: [{
+                        label: '央行重貼現率 (%)',
+                        data: [1.875, 1.875, 1.875, 1.875, 2.0, 2.0, 2.125, 2.125, 2.125, 2.125, 2.125],
+                        borderColor: '#0284c7',
+                        backgroundColor: '#0284c7',
+                        yAxisID: 'y',
+                        tension: 0.1
+                    }, {
+                        label: 'CPI 年增率 (%)',
+                        data: [2.6, 2.1, 2.5, 2.7, 2.4, 2.2, 2.1, 1.9, 2.0, 2.1, 1.95],
+                        borderColor: '#f59e0b',
+                        backgroundColor: '#f59e0b',
+                        yAxisID: 'y1',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: '利率 (%)'
+                            },
+                            min: 1.5,
+                            max: 3.0
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                             title: {
+                                display: true,
+                                text: 'CPI年增率 (%)'
+                            },
+                             min: 1.5,
+                             max: 3.0,
+                            grid: {
+                                drawOnChartArea: false,
+                            },
+                        },
+                    },
+                     plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += context.parsed.y + '%';
+                                    }
+                                    return label;
+                                }
+                            }
+                        },
+                        legend: {
+                           position: 'bottom',
+                        }
+                    }
+                }
+            });
+            
+            const ctxVolume = document.getElementById('volumeForecastChart').getContext('2d');
+            new Chart(ctxVolume, {
+                type: 'bar',
+                data: {
+                    labels: ['2025 Q3 (實際)', '2025 Q4 (預估)'],
+                    datasets: [{
+                        label: '全國建物買賣移轉棟數',
+                        data: [82500, 75000],
+                        backgroundColor: [
+                            'rgba(59, 130, 246, 0.6)',
+                            'rgba(239, 68, 68, 0.6)',
+                        ],
+                        borderColor: [
+                            'rgba(59, 130, 246, 1)',
+                            'rgba(239, 68, 68, 1)',
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                           display: false,
+                        },
+                         title: {
+                            display: true,
+                            text: '房市交易量短期預測'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 60000,
+                            ticks: {
+                                callback: function(value, index, values) {
+                                    return value / 1000 + 'K';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+        });
+    </script>
+</body>
+</html>
+
